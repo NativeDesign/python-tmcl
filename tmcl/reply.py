@@ -9,12 +9,12 @@ class TrinamicException (Exception):
 
 class Reply (object):
     def __init__(self, reply_struct):
-        self.reply_address = reply[0]
-        self.module_address = reply[1]
-        self.status = reply[2]
-        self.command = reply[3]
-        self.value = reply[4]
-        self.checksum = reply[5]
+        self.reply_address = reply_struct[0]
+        self.module_address = reply_struct[1]
+        self.status = reply_struct[2]
+        self.command = reply_struct[3]
+        self.value = reply_struct[4]
+        self.checksum = reply_struct[5]
 
     class Status (object):
         SUCCESS = 100

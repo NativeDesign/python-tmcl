@@ -13,7 +13,7 @@ class Motor (object):
 
 
     def send (self, cmd, type, motorbank, value):
-        self.bus.send(self.address, cmd, type, motorbank, value)
+        return self.bus.send(self.address, cmd, type, motorbank, value)
 
     def stop (self):
         self.send( Command.MST, 0, self.motor, 0 )
