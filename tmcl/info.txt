@@ -1,0 +1,3 @@
+Big fuckup: address!
+It is the address of the module, should be set when connecting to it rather than every time when doing something on the bus...
+Also, the motor cannot be addressed directly.
