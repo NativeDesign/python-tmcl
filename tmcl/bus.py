@@ -1,6 +1,6 @@
 import struct
 from .motor import Motor
-from .reply import Reply
+from .reply import Reply, TrinamicException
 
 
 MSG_STRUCTURE = ">BBBBIB"
@@ -21,7 +21,7 @@ class Bus (object):
         self.CAN = CAN
         self.serial = serial
 
-
+    # def checksum(
 
     def send ( self, address, command, type, motorbank, value ):
         if self.CAN:
@@ -33,7 +33,11 @@ class Bus (object):
             reply = Reply(resp)
             return self._handle_reply(reply)
         else:
-            checksum = address + command + type + motorbank + value
+            checksum_struct = struct.pack(MSG_STRUCTURE[:-1], address, command, type, motorbank, value)
+            checksum = 0
+            for s in checksum_struct:
+                checksum += int(s)
+            checksum = checksum % 256
             msg = struct.pack(MSG_STRUCTURE, address, command, type, motorbank, value, checksum)
             self.serial.write(msg)
             rep = self.serial.read(REPLY_LENGTH)

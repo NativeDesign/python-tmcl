@@ -3,7 +3,7 @@
 
 class TrinamicException (Exception):
     def __init__ (self, reply):
-        super(TrinamicException, self).__init__( Status.messages[reply.status] )
+        super(TrinamicException, self).__init__( Reply.Status.messages[reply.status] )
         self.reply = reply
 
 
