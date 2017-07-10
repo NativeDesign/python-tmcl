@@ -20,9 +20,15 @@ class Bus (object):
     def __init__( self, serial, CAN = False ):
         self.CAN = CAN
         self.serial = serial
-
-    # def checksum(
-
+    
+    def binaryadd(address, command, type, motorbank, value):
+        checksum_struct = struct.pack(MSG_STRUCTURE[:-1], address, command, type, motorbank, value)
+        checksum = 0
+        for s in checksum_struct:
+            checksum += int(s) % 256
+            checksum  = checksum % 256
+        return checksum
+    
     def send ( self, address, command, type, motorbank, value ):
         if self.CAN:
             msg = struct.pack(MSG_STRUCTURE_CAN, command, type, motorbank,value)
@@ -33,26 +39,17 @@ class Bus (object):
             reply = Reply(resp)
             return self._handle_reply(reply)
         else:
-            checksum_struct = struct.pack(MSG_STRUCTURE[:-1], address, command, type, motorbank, value)
-            checksum = 0
-            for s in checksum_struct:
-                checksum += int(s)
-            checksum = checksum % 256
+            checksum = binaryadd(address, command, type, motorbank, value)
             msg = struct.pack(MSG_STRUCTURE, address, command, type, motorbank, value, checksum)
             self.serial.write(msg)
             rep = self.serial.read(REPLY_LENGTH)
             reply = Reply(struct.unpack(REPLY_STRUCTURE, rep))
             return self._handle_reply(reply)
-
-
-
+    
     def _handle_reply (self, reply):
         if reply.status < Reply.Status.SUCCESS:
             raise TrinamicException(reply)
         return reply
-
-
-
-
+    
     def get_motor (self, address):
         return Motor(self, address)
