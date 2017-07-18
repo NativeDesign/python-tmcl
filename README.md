@@ -91,28 +91,28 @@ API Overview
 
 #### class Motor (bus, address, axis)
 
-##### move_absolute (position)
+##### `move_absolute (position)`
 Move the motor to the specified _absolute_ position.
 
-##### move_relative (offset)
+##### `move_relative (offset)`
 Move the motor by the specified offset _relative to current position_.
 
-##### reference_search (rfs_type)
+##### `reference_search (rfs_type)`
 Start a reference search routine to locate limit switches.
 
-##### rotate_left (velocity)
+##### `rotate_left (velocity)`
 Rotate the motor left-wards at the specified velocity.
 
-##### rotate_right (velocity)
+##### `rotate_right (velocity)`
 Rotate the motor right-wards at the specified velocity.
 
-##### run_command (cmd)
+##### `run_command (cmd)`
 Execute a predefined user subroutine written to TMCM module firmware
 
-##### send (cmd, type, motorbank, value)
+##### `send (cmd, type, motorbank, value)`
 Send a raw TMCL command to the motor. 
 
-##### stop ()
+##### `stop ()`
 Stop the motor
 
 
