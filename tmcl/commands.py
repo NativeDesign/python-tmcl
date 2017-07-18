@@ -12,8 +12,8 @@ class Command:
     GAP     = 6
     STAP    = 7
     RSAP    = 8
-    SGP     = 9
-    GGP     = 10
+    SGP     = 9         # Set global parameter
+    GGP     = 10        # Get global parameter
     STGP    = 11
     RSGP    = 12
     SIO     = 14

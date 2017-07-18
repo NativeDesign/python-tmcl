@@ -2,22 +2,62 @@
 from .commands import Command
 
 
+
+class Module (object):
+    """
+    Represents a single TMCM module present on the bus.
+    """
+
+    def __init__ (self, bus, address = 1):
+        """        
+        :param bus: 
+            A Bus instance that is connected to one or more 
+            physical TMCM modules via serial port
+        :type  bus: TMCL.Bus
+        
+        :param address: 
+            Module address. This defaults to 1
+        :type  address: int
+        
+        """
+        self.bus = bus
+        self.address = address
+
+
+    def get_motor (self, axis=0):
+        """
+        Return an interface to a single axis (motor) connected to 
+        this module.
+        
+        :param axis: 
+            Axis ID (defaults to 0)
+        :type axis: int
+        
+        :return: An interface to the desired axis/motor
+        :rtype:  Motor
+        """
+        return Motor(self.bus, self.address, axis)
+
+
+
+
+
 class Motor (object):
     RFS_START  = 0
     RFS_STOP   = 1
     RFS_STATUS = 2
     
-    def __init__ (self, bus, address = 1, motor = 0):
+    def __init__ ( self, bus, address = 1, axis = 0 ):
         self.bus = bus
-        self.address = address
-        self.motor = motor
+        self.module_id = address
+        self.motor_id = axis
         self.axis = AxisParameterInterface(self)
 
     def send (self, cmd, type, motorbank, value):
-        return self.bus.send(self.address, cmd, type, motorbank, value)
+        return self.bus.send(self.module_id, cmd, type, motorbank, value)
 
     def stop (self):
-        self.send( Command.MST, 0, self.motor, 0 )
+        self.send(Command.MST, 0, self.motor_id, 0)
 
     def get_user_var (self, n ):
         reply = self.send( Command.GGP, n, 2, 0)
@@ -28,25 +68,30 @@ class Motor (object):
         return reply.status
 
     def run_command (self, cmdIndex):
-        reply = self.send( Command.RUN_APPLICATION, 1, self.motor, cmdIndex )
+        reply = self.send(Command.RUN_APPLICATION, 1, self.motor_id, cmdIndex)
         return reply.status
     
     def reference_search(self, rfs_type):
-        reply = self.send( Command.RFS, rfs_type, self.motor, 99 )
+        reply = self.send(Command.RFS, rfs_type, self.motor_id, 99)
         return reply.status
 
 
 
 class AxisParameterInterface (object):
     def __init__(self, motor):
+        """
+        
+        :param motor:
+        :type  motor: Motor
+        """
         self.motor = motor
 
     def get (self, param):
-        reply = self.motor.send( Command.GAP, param, self.motor.motor, 0)
+        reply = self.motor.send(Command.GAP, param, self.motor.motor_id, 0)
         return reply.value
 
     def set (self, param, value):
-        reply = self.motor.send( Command.SAP, param, self.motor.motor, value)
+        reply = self.motor.send(Command.SAP, param, self.motor.motor_id, value)
         return reply.status
 
 
