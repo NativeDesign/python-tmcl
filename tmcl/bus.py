@@ -43,7 +43,7 @@ class Bus (object):
 
 
     def _handle_reply (self, reply):
-        if reply.status < Reply.Status.SUCCESS:
+        if reply.status < Reply.Status.COMMAND_LOADED:
             raise TrinamicException(reply)
         return reply
 
