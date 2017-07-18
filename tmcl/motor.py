@@ -3,14 +3,15 @@ from .commands import Command
 
 
 class Motor (object):
-
-
-    def __init__ (self, bus, address, motor = 0):
+    RFS_START  = 0
+    RFS_STOP   = 1
+    RFS_STATUS = 2
+    
+    def __init__ (self, bus, address = 1, motor = 0):
         self.bus = bus
         self.address = address
         self.motor = motor
         self.axis = AxisParameterInterface(self)
-
 
     def send (self, cmd, type, motorbank, value):
         return self.bus.send(self.address, cmd, type, motorbank, value)
@@ -29,11 +30,10 @@ class Motor (object):
     def run_command (self, cmdIndex):
         reply = self.send( Command.RUN_APPLICATION, 1, self.motor, cmdIndex )
         return reply.status
-
-
-
-
-
+    
+    def reference_search(self, rfs_type):
+        reply = self.send( Command.RFS, rfs_type, self.motor, 99 )
+        return reply.status
 
 
 
