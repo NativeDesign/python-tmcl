@@ -13,6 +13,7 @@ class Reply(object):
 		self.value = reply_struct[4]
 		self.checksum = reply_struct[5]
 
+
 	class Status(object):
 		SUCCESS = 100
 		COMMAND_LOADED = 101
