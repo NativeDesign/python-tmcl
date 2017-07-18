@@ -56,7 +56,7 @@ class AxisParameterInterface (object):
 
     @target_position.setter
     def target_position (self, value):
-        return self.set(0, value)
+        self.set(0, value)
 
     @property
     def actual_position (self):
@@ -64,7 +64,7 @@ class AxisParameterInterface (object):
 
     @actual_position.setter
     def actual_position (self, value):
-        return self.set(1, value)
+        self.set(1, value)
 
     @property
     def target_speed (self):
@@ -72,7 +72,7 @@ class AxisParameterInterface (object):
 
     @target_speed.setter
     def target_speed(self, value):
-        return self.set( 2, value )
+        self.set( 2, value )
 
     @property
     def actual_speed (self):
@@ -84,7 +84,7 @@ class AxisParameterInterface (object):
 
     @max_positioning_speed.setter
     def max_positioning_speed (self, value):
-        return self.set(4, value)
+        self.set(4, value)
 
     @property
     def max_accelleration (self):
@@ -92,7 +92,7 @@ class AxisParameterInterface (object):
 
     @max_accelleration.setter
     def max_accelleration (self, value):
-        return self.set( 5, value)
+        self.set( 5, value)
 
     @property
     def max_current (self):
@@ -100,7 +100,7 @@ class AxisParameterInterface (object):
 
     @max_current.setter
     def max_current (self, value):
-        return self.set(6, value)
+        self.set(6, value)
 
     @property
     def standby_current (self):
@@ -108,7 +108,7 @@ class AxisParameterInterface (object):
 
     @standby_current.setter
     def standby_current (self, value):
-        return self.set(7,value)
+        self.set(7,value)
 
     @property
     def target_position_reached (self):
@@ -132,7 +132,7 @@ class AxisParameterInterface (object):
 
     @right_limit_switch_disabled.setter
     def right_limit_switch_disabled (self, value):
-        return self.set(12, 1 if value else 0)
+        self.set(12, 1 if value else 0)
 
     @property
     def left_limit_switch_disabled (self):
@@ -140,4 +140,4 @@ class AxisParameterInterface (object):
 
     @left_limit_switch_disabled.setter
     def left_limit_switch_disabled (self, value):
-        return self.set(13, 1 if value else 0)
+        self.set(13, 1 if value else 0)
