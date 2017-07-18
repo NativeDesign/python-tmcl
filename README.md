@@ -74,7 +74,7 @@ serial_port = Serial("/dev/tty.usbmodem1241")
 bus = TMCL.connect(serial_port)
 
 ## Get the motor on axis 0 of module with address 1
-module = bus.get_module( MODULE_ADDRESS )
+module = bus.get_module( 1 )
 
 a0 = module.get_motor(0)
 a0 = module.get_motor(1)
@@ -82,6 +82,38 @@ a0 = module.get_motor(2)
 
 ```
 
+
+
+
+API Overview
+------------
+
+
+#### class Motor (bus, address, axis)
+
+##### move_absolute (position)
+Move the motor to the specified _absolute_ position.
+
+##### move_relative (offset)
+Move the motor by the specified offset _relative to current position_.
+
+##### reference_search (rfs_type)
+Start a reference search routine to locate limit switches.
+
+##### rotate_left (velocity)
+Rotate the motor left-wards at the specified velocity.
+
+##### rotate_right (velocity)
+Rotate the motor right-wards at the specified velocity.
+
+##### run_command (cmd)
+Execute a predefined user subroutine written to TMCM module firmware
+
+##### send (cmd, type, motorbank, value)
+Send a raw TMCL command to the motor. 
+
+##### stop ()
+Stop the motor
 
 
 [1]: https://www.trinamic.com/support/software/tmcl-ide/

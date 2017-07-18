@@ -66,7 +66,7 @@ class Motor(object):
 	def rotate_left (self, velocity ):
 		reply = self.send(Command.ROL, 0, self.motor_id, velocity)
 		return reply.status
-		
+
 	def rotate_right(self, velocity):
 		reply = self.send(Command.ROR, 0, self.motor_id, velocity)
 		return reply.status
