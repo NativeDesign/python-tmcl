@@ -77,8 +77,8 @@ bus = TMCL.connect(serial_port)
 module = bus.get_module( 1 )
 
 a0 = module.get_motor(0)
-a0 = module.get_motor(1)
-a0 = module.get_motor(2)
+a1 = module.get_motor(1)
+a2 = module.get_motor(2)
 
 ```
 
