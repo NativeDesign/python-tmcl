@@ -63,6 +63,21 @@ class Motor(object):
 		reply = self.send(Command.SGP, n, 2, value)
 		return reply.status
 
+	def rotate_left (self, velocity ):
+		reply = self.send(Command.ROL, 0, self.motor_id, velocity)
+		return reply.status
+		
+	def rotate_right(self, velocity):
+		reply = self.send(Command.ROR, 0, self.motor_id, velocity)
+		return reply.status
+
+	def move_absolute (self, position):
+		reply = self.send(Command.MVP, 0, self.motor_id, position)
+		return reply.status
+
+	def move_relative (self, offset):
+		reply = self.send(Command.MVP, 1, self.motor_id, offset)
+
 	def run_command( self, cmdIndex ):
 		reply = self.send(Command.RUN_APPLICATION, 1, self.motor_id, cmdIndex)
 		return reply.status
