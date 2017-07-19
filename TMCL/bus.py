@@ -23,6 +23,7 @@ class Bus (object):
 		self.CAN = CAN
 		self.serial = serial
 
+
 	def send ( self, address, command, type, motorbank, value ):
 		"""
 		Send a message to the specified module.
@@ -55,6 +56,7 @@ class Bus (object):
 			reply = Reply(struct.unpack(REPLY_STRUCTURE, rep))
 			return self._handle_reply(reply)
 
+
 	def get_module( self, address=1 ):
 		"""
 			Returns a Module object targeting the device at address `address`
@@ -67,6 +69,7 @@ class Bus (object):
 			:rtype: Module
 		"""
 		return Module(self, address)
+
 
 	def get_motor( self, address=1, motor_id=0 ):
 		"""		
@@ -87,12 +90,14 @@ class Bus (object):
 
 			:rtype: Motor
 		"""
-		return Motor(self, address, motor_id)
+		return self.get_module(address).get_motor(motor_id)
+
 
 	def _handle_reply (self, reply):
 		if reply.status < Reply.Status.SUCCESS:
 			raise TrinamicException(reply)
 		return reply
+
 
 	def _binaryadd( self, address, command, type, motorbank, value ):
 		checksum_struct = struct.pack(MSG_STRUCTURE[:-1], address, command, type, motorbank, value)

@@ -89,7 +89,9 @@ API Overview
 ------------
 
 
-#### class Motor (bus, address, axis)
+### class Motor (bus, address, axis)
+
+#### Methods
 
 ##### `move_absolute (position)`
 Move the motor to the specified _absolute_ position.
@@ -115,5 +117,91 @@ Send a raw TMCL command to the motor.
 ##### `stop ()`
 Stop the motor
 
+##### `set_axis_param ( param, value )`
+Set axis parameter. See property definitions below for several
+utility setters for common axis properties.
+
+##### `get_axis_param (param, value)`
+Get axis parameter. See property definitions below for 
+several utility getters for common axis properties.
+
+
+#### Properties
+
+>	Note: The TMCM-100 module uses a different parameter set 
+>	      (see chapter 4.3), but all other TMCL stepper motor 
+>	      modules use these parameters.
+
+
+##### `int target_position`
+The desired position in position mode. Range ±2²³.
+
+##### `int actual_position`
+The current position of the motor. Should only be
+overwritten for reference point setting. Range ±2²³.
+
+##### `int target_speed`
+The desired speed in velocity mode (see ramp mode, no.
+138). In position mode, this parameter is set by
+hardware: to the maximum speed during acceleration,
+and to zero during deceleration and rest. Range ±2047.
+
+##### `readonly int actual_speed`
+The current rotation speed. Range ±2047.
+
+##### `int max_positioning_speed`
+Should not exceed the physically highest possible value.
+Adjust the pulse divisor (no. 154), if the speed value is
+very low (<50) or above the upper limit. See TMC 428
+datasheet (p.24) for calculation of physical units. 
+Range 0..2047.
+
+##### `int max_accelleration`
+The limit for acceleration (and deceleration). Changing
+this parameter requires re-calculation of the acceleration
+factor (no. 146) and the acceleration divisor (no.137),
+which is done automatically. See TMC 428 datasheet
+(p.24) for calculation of physical units.
+Range 0..2047.
+
+##### `int max_current`
+The most important motor setting, since too high values
+might cause motor damage! Note that on the TMCM-300
+the phase current can not be reduced down to zero due
+to the Allegro A3972 driver hardware.
+On the TMCM-300, 303, 310, 110, 610, 611 and 612 the
+maximum value is 1500 (which means 1.5A).
+On all other modules the maximum value is 255 (which
+means 100% of the maximum current of the module).
+
+##### `int standby_current`
+The current limit two seconds after the motor has
+stopped. The value range of this parameter is the same as with
+`max_current`.
+
+##### `readonly bool target_position_reached`
+Indicates that the actual position equals the target
+position.
+
+##### `readonly bool ref_switch_status`
+The logical state of the reference (left) switch.
+See the TMC 428 data sheet for the different switch
+modes. Default is two switch mode: the left switch as
+the reference switch, the right switch as a limit (stop)
+switch.
+
+##### `readonly bool right_limit_switch_status`
+The logical state of the (right) limit switch.
+
+##### `readonly bool left_limit_switch_status`
+The logical state of the left limit switch (in three switch
+mode).
+
+##### `bool right_limit_switch_disabled`
+If set, deactivates the stop function of the right switch
+
+##### `bool left_limit_switch_disabled`
+If set, deactivates the stop function of the left switch resp.
+reference switch if set
 
 [1]: https://www.trinamic.com/support/software/tmcl-ide/

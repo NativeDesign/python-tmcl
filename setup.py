@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='TMCL',
-	version='1.2',
+	version='2.0',
 	description='Talk to Trinamic Stepper Motors using TMCL over serial',
 	url='https://github.com/NativeDesign/python-tmcl',
 	author='Alan Pich',

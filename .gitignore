@@ -2,5 +2,5 @@
 *.pyc
 /.idea
 /.venv
-/dist
 /build
+/dist
