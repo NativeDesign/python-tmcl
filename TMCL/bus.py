@@ -1,5 +1,6 @@
 import struct
-from .motor import Module, Motor
+from .__module import Module
+from .motor import Motor
 from .reply import Reply, TrinamicException
 
 
@@ -19,6 +20,21 @@ REPLY_LENGTH_IIC = 8
 
 class Bus (object):
 
+	serial = None
+	"""
+	Serial port used for communication
+
+	:type: serial.Serial
+	"""
+
+	CAN = False
+	"""
+	True if talking over CANbus
+
+	:type: bool
+	"""
+
+
 	def __init__( self, serial, CAN = False ):
 		self.CAN = CAN
 		self.serial = serial
@@ -31,6 +47,8 @@ class Bus (object):
 		has been received from the module.
 		
 		See the TMCL docs for full descriptions of the parameters
+		
+		@TODO Handle 'Target Position Reached Event' messages (docs pg 48)
 		
 		:param address:   Module address to send command to
 		:param command:   Instruction no

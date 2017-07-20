@@ -5,13 +5,21 @@ class TrinamicException(Exception):
 
 
 class Reply(object):
-	def __init__( self, reply_struct ):
-		self.reply_address = reply_struct[0]
-		self.module_address = reply_struct[1]
-		self.status = reply_struct[2]
-		self.command = reply_struct[3]
-		self.value = reply_struct[4]
-		self.checksum = reply_struct[5]
+	reply_address = None
+	module_address = None
+	status = 0
+	command = 0
+	value = 0
+	checksum = 0
+
+	def __init__( self, reply_struct=None ):
+		if reply_struct:
+			self.reply_address = reply_struct[0]
+			self.module_address = reply_struct[1]
+			self.status = reply_struct[2]
+			self.command = reply_struct[3]
+			self.value = reply_struct[4]
+			self.checksum = reply_struct[5]
 
 
 	class Status(object):

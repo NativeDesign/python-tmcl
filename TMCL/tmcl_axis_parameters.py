@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-from .commands import Command
+from .tmcl_commands import Command
 
 
 class AxisParams:

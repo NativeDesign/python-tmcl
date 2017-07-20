@@ -2,4 +2,9 @@
 v2.0
 ----
 
-- 
+-  Motor class is now ONLY concerned with axis-level operations on a module.
+
+	- Axis parameters have been moved from Motor.axis to direct properties
+	  of the Motor class.
+
+	- Extensive inline documentation added to codebase

@@ -1,9 +1,7 @@
 # -*- coding: UTF-8 -*-
-
-from .axis_parameters import AxisParameterInterface
-from .commands import Command
-from .module import Module
-from .axis_parameters import AxisParams
+from TMCL.instruction import Instruction
+from .tmcl_commands import Command
+from .tmcl_axis_parameters import AxisParams
 
 
 class Motor(object, AxisParams):
@@ -18,11 +16,42 @@ class Motor(object, AxisParams):
 	RFS_STOP = 1
 	RFS_STATUS = 2
 
+
+	ALLOWED_COMMANDS = [
+		Command.ROR,
+		Command.ROL,
+		Command.MST,
+		Command.MVP,
+		Command.SAP,
+		Command.GAP,
+		Command.STAP,
+		Command.RSAP,
+		Command.RFS,
+		Command.SCO,
+		Command.GCO,
+		Command.CCO
+	]
+
+
+	module = None
+	"""
+	Module that hosts this motor
+	
+	:type: TMCL.Module
+	"""
+
+	axis = 0
+	"""
+	Motor axis ID on module
+	
+	:type:  int
+	"""
+
 	def __init__( self, module, axis=0, max_velocity=2047 ):
 		"""
 		
-		:param module: TMCM module object
-		:type  module: Module
+		:param module: TMCM module instance
+		:type  module: TMCL.module.Module
 		
 		:param axis: Motor axis id
 		:type  axis: int
@@ -35,7 +64,7 @@ class Motor(object, AxisParams):
 		"""
 		self._max_velocity = max_velocity   # type: int
 		self.axis = axis                    # type: int
-		self.module = None                  # type: Module
+		self.module = module                # type: TMCL.module.Module
 
 
 	########################################################################
@@ -52,38 +81,42 @@ class Motor(object, AxisParams):
 		
 		:param cmd:  
 			TMCL command to send to the motor.
-			Must be one of TMCL.Command.* values
+			Must be one of ``TMCL.Command.*``
 		:type  cmd: int
 		
 		:param type:  TMCL type parameter 
 		:type  type:  int
 		
 		:param value: TMCL value parameter
-		:type  type:  int
+		:type  value:  int
 		
 		:rtype:  TMCL.Reply
 		"""
-		if cmd not in [
-			Command.ROR,
-			Command.ROL,
-			Command.MST,
-			Command.MVP,
-			Command.SAP,
-			Command.GAP,
-			Command.STAP,
-			Command.RSAP,
-			Command.RFS,
-			Command.SCO,
-			Command.GCO,
-			Command.CCO
-		]: raise AttributeError("Specified command cannot target a motor/axis")
+		assert isinstance(cmd,(int,Instruction)),   'cmd must be int or Instruction'
+		assert isinstance(type,int),                'type must be an int'
+		assert 0 <= type <= 255,                    'type must be in [0..255]'
+		assert isinstance(value, int),              'value must be int'
 
-		return self.module.send( cmd, type, self.axis, value)
+		if isinstance(cmd, Instruction):
+			assert cmd.cmd in self.ALLOWED_COMMANDS, 'Specified command cannot target a motor/axis'
+			cmd.axis = self.axis
+			return self.module.send(cmd)
+		else:
+			assert cmd in self.ALLOWED_COMMANDS, 'Specified command cannot target a motor/axis'
+			return self.module.send(Instruction(cmd, type, self.axis, value))
 
 
 	def get_axis_param (self, param):
 		"""
-		Get the value of an axis parameter
+		Most parameters of a TMCM module can be adjusted individually for 
+		each axis. Although these parameters vary widely in their formats 
+		(1 to 24 bits, signed or unsigned) and physical locations (TMC428, 
+		TMC453, controller RAM, controller EEPROM), they all can be read by 
+		this function. In stand-alone mode the requested value is also 
+		transferred to the accumulator register for further processing 
+		purposes such as conditioned jumps. In direct mode, the value read 
+		is only output in the “value” field of the reply, without affecting 
+		the accumulator. See chapter 4 for a complete list of all parameters.
 		
 		:param param: Axis parameter id (see AxisParams)
 		:type  param: int
@@ -91,13 +124,25 @@ class Motor(object, AxisParams):
 		:return: Axis param value. Type depends on param
 		:rtype:  int
 		"""
-		reply = self.send(Command.GAP, type=param)
-		return reply.value
+		assert isinstance(param, int),  'param must be an int'
+		assert 0 <= param <= 255,       'param must be in [0..255]'
+
+		return self.send(Command.GAP, type=param).value
 
 
 	def set_axis_param (self, param, value):
 		"""
-		Set an axis param on this motor
+		Set an axis parameter on this motor
+		
+		From the TMCL docs:
+			
+			Most parameters of a TMCM module can be adjusted individually for 
+			each axis. Although these parameters vary widely in their formats 
+			(1 to 24 bits, signed or unsigned) and physical locations 
+			(TMC428, TMC453, controller RAM, controller EEPROM), they all can 
+			be set by this function. See chapter 4 for a complete list of all 
+			axis parameters. See STAP (section 3.7) for permanent storage of a 
+			modified value.
 		
 		:param param: Axis parameter id
 		:type  param: int
@@ -107,6 +152,10 @@ class Motor(object, AxisParams):
 		
 		:rtype:  TMCL.Reply
 		"""
+		assert isinstance(param, int),          'param must be an int'
+		assert 0 <= param <= 255,               'param must be in [0..255]'
+		assert isinstance(value, (int,long)),   'value must be an int'
+
 		return self.send(Command.SAP, type=param, value=value)
 
 
@@ -134,8 +183,8 @@ class Motor(object, AxisParams):
 		:return: Response status (TMCL.Reply.Status.*)
 		:rtype:  int
 		"""
-		if not (0 <= velocity <= self._max_velocity):
-			raise ValueError("Velocity must be between 0 and "+str(self._max_velocity))
+		assert isinstance(velocity,(int,long)),         'velocity must be an int'
+		assert 0 <= velocity <= self._max_velocity,     'velocity must be in [0..'+str(self._max_velocity)+']'
 
 		reply = self.send(Command.ROL, value=velocity)
 		return reply.status
@@ -152,8 +201,8 @@ class Motor(object, AxisParams):
 		:return: Response status (TMCL.Reply.Status.*)
 		:rtype:  int
 		"""
-		if not (0 <= velocity <= self._max_velocity):
-			raise ValueError("Velocity must be between 0 and "+str(self._max_velocity))
+		assert isinstance(velocity, (int,long))
+		assert 0 <= velocity <= self._max_velocity,     'velocity must be in [0..'+str(self._max_velocity)+']'
 
 		reply = self.send(Command.ROR, value=velocity)
 		return reply.status
@@ -173,8 +222,8 @@ class Motor(object, AxisParams):
 		:type  position:  int [±2^23]
 		:return: 
 		"""
-		if not ( -2**23 <= position <= 2**23):
-			raise ValueError("Position must be within range +-2^23")
+		assert isinstance(position, int),   'position must be an int'
+		assert -2**23 <= position <= 2**23, 'position must be in range +-2^23'
 
 		reply = self.send(Command.MVP, type=0, value=position)
 		return reply.status
@@ -195,45 +244,39 @@ class Motor(object, AxisParams):
 		:type  offset: int [±2^23]
 		:return: 
 		"""
-		if not ( -2**23 <= offset <= 2**23):
-			raise ValueError("Position must be within range +-2^23")
+		assert isinstance(offset, int),     'offset must be an int'
+		assert -2**23 <= offset <= 2**23,   'Position must be within range +-2^23'
 
 		reply = self.send(Command.MVP, type=1, value=offset)
 		return reply.status
 
 
-	# def run_command( self, cmdIndex ):
-	# 	"""
-	#
-	# 	:param cmdIndex:
-	# 	:return:
-	# 	"""
-	# 	reply = self.send(Command.RUN_APPLICATION, 1, self.motor_id, cmdIndex)
-	# 	return reply.status
-
-
 	def reference_search( self, rfs_type ):
 		"""
-		A build-in reference point search algorithm can be started (and stopped). 
-		The reference search algorithm provides switching point calibration and 
-		three switch modes. The status of the reference search can also be queried 
-		to see if it has already finished. (In a TMCL program it is better to use 
-		the WAIT command to wait for the end of a reference search.) Please see the 
-		appropriate parameters in the axis parameter table to configure the reference 
-		search algorithm to meet your needs (chapter 4). The reference search can be 
-		started or stopped, or the actual status of the reference search can be checked.
+		Initiate a reference search.
 		
-		:param rfs_type: RFS_START | RFS_STOP | RFS_STATUS
+		From the TMCL docs:
+		
+			A build-in reference point search algorithm can be started (and stopped). 
+			The reference search algorithm provides switching point calibration and 
+			three switch modes. The status of the reference search can also be queried 
+			to see if it has already finished. (In a TMCL program it is better to use 
+			the WAIT command to wait for the end of a reference search.) Please see the 
+			appropriate parameters in the axis parameter table to configure the reference 
+			search algorithm to meet your needs (chapter 4). The reference search can be 
+			started or stopped, or the actual status of the reference search can be checked.
+		
+		:param rfs_type: ``RFS_START | RFS_STOP | RFS_STATUS``
 		:type  rfs_type: int
 		
-		:return: When `rfs_type` == RFS_STATUS; nonzero means reference search in progress
+		:return: When `rfs_type` == ``RFS_STATUS``; nonzero means reference search in progress
 		:rtype:  int
 		"""
-		if not rfs_type in [
+		assert rfs_type in [
 			self.RFS_START,
 			self.RFS_STATUS,
 			self.RFS_STOP
-		]: raise ValueError("rfs_type must be RFS_START | RFS_STATUS | RFS_STOP")
+		], 'rfs_type must be RFS_START | RFS_STATUS | RFS_STOP'
 
 		reply = self.send(Command.RFS, type=rfs_type)
 		return reply.status
@@ -246,6 +289,11 @@ class Motor(object, AxisParams):
 
 	@property
 	def target_position ( self ):
+		"""
+		The desired position in position mode.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.TARGET_POSITION)
 
 
@@ -256,6 +304,13 @@ class Motor(object, AxisParams):
 
 	@property
 	def actual_position ( self ):
+		"""
+		The current position of the motor. Should only be overwritten 
+		for reference point setting.
+		
+		:type: int
+		:access: readonly
+		"""
 		return self.get_axis_param(AxisParams.ACTUAL_POSITION)
 
 
@@ -266,6 +321,14 @@ class Motor(object, AxisParams):
 
 	@property
 	def target_speed ( self ):
+		"""
+		The desired speed in velocity mode (see ramp mode, no. 138). 
+		In position mode, this parameter is set by hardware: to the 
+		maximum speed during acceleration, and to zero during 
+		deceleration and rest.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.TARGET_SPEED)
 
 
@@ -276,11 +339,25 @@ class Motor(object, AxisParams):
 
 	@property
 	def actual_speed ( self ):
+		"""
+		The current rotation speed. Should never be overwritten.
+		
+		:type: int
+		:access: readonly
+		"""
 		return self.get_axis_param(AxisParams.ACTUAL_SPEED)
 
 
 	@property
 	def max_positioning_speed ( self ):
+		"""
+		Should not exceed the physically highest possible value.
+		Adjust the pulse divisor (no. 154), if the speed value is
+		very low (<50) or above the upper limit. See TMC 428
+		datasheet (p.24) for calculation of physical units.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.MAX_POSITIONING_SPEED)
 
 
@@ -291,6 +368,15 @@ class Motor(object, AxisParams):
 
 	@property
 	def max_accelleration ( self ):
+		"""
+		The limit for acceleration (and deceleration). Changing
+		this parameter requires re-calculation of the acceleration
+		factor (no. 146) and the acceleration divisor (no.137),
+		which is done automatically. See TMC 428 datasheet
+		(p.24) for calculation of physical units.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.MAX_ACCELLERATION)
 
 
@@ -301,6 +387,18 @@ class Motor(object, AxisParams):
 
 	@property
 	def max_current ( self ):
+		"""
+		The most important motor setting, since too high values
+		might cause motor damage! Note that on the TMCM-300
+		the phase current can not be reduced down to zero due
+		to the Allegro A3972 driver hardware.
+		On the TMCM-300, 303, 310, 110, 610, 611 and 612 the
+		maximum value is 1500 (which means 1.5A).
+		On all other modules the maximum value is 255 (which
+		means 100% of the maximum current of the module)
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.MAX_CURRENT)
 
 
@@ -311,6 +409,13 @@ class Motor(object, AxisParams):
 
 	@property
 	def standby_current ( self ):
+		"""
+		The current limit two seconds after the motor has stopped.
+		The value range of this parameter is the same as with
+		parameter 6.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.STANDBY_CURRENT)
 
 
@@ -321,26 +426,55 @@ class Motor(object, AxisParams):
 
 	@property
 	def target_position_reached ( self ):
+		"""
+		Indicates that the actual position equals the target position.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.TARGET_POSITION_REACHED)
 
 
 	@property
 	def ref_switch_status ( self ):
+		"""
+		The logical state of the reference (left) switch.
+		See the TMC 428 data sheet for the different switch
+		modes. Default is two switch mode: the left switch as
+		the reference switch, the right switch as a limit (stop)
+		switch.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.REF_SWITCH_STATUS)
 
 
 	@property
 	def right_limit_status ( self ):
+		"""
+		The logical state of the (right) limit switch.
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.RIGHT_LIMIT_SWITCH_STATUS)
 
 
 	@property
 	def left_limit_status ( self ):
+		"""
+		The logical state of the left limit switch (in three switch mode)
+		
+		:type: int 
+		"""
 		return self.get_axis_param(AxisParams.LEFT_LIMIT_SWITCH_STATUS)
 
 
 	@property
 	def right_limit_switch_disabled ( self ):
+		"""
+		If set, deactivates the stop function of the right switch 
+		
+		:type: int 
+		"""
 		return True if self.get_axis_param(AxisParams.RIGHT_LIMIT_SWITCH_DISABLE) == 1 else False
 
 
@@ -351,6 +485,12 @@ class Motor(object, AxisParams):
 
 	@property
 	def left_limit_switch_disabled ( self ):
+		"""
+		Deactivates the stop function of the left switch resp. 
+		reference switch if set.
+		
+		:type: int 
+		"""
 		return True if self.get_axis_param(AxisParams.LEFT_LIMIT_SWITCH_DISABLE) == 1 else False
 
 

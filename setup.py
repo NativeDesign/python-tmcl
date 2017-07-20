@@ -1,22 +1,40 @@
 from setuptools import setup
 
-setup(name='TMCL',
+
+dependencies = [
+	'pyserial'
+]
+
+dev_dependencies = [
+	'pytest',
+	'mock'
+]
+
+
+setup(
+	name='TMCL',
 	version='2.0',
 	description='Talk to Trinamic Stepper Motors using TMCL over serial',
 	url='https://github.com/NativeDesign/python-tmcl',
 	author='Alan Pich',
 	author_email='alanp@native.com',
 	license='MIT',
-	packages=['TMCL'],
-	install_requires=[
-		'pyserial'
-	],
-	keywords = [
+	keywords=[
 		'tmcl',
-	    'trinamic',
+		'trinamic',
 		'rs485',
 		'stepper',
 		'motor',
 		'tmcm'
 	],
-	zip_safe=False)
+
+	packages=['TMCL'],
+
+	install_requires = dependencies,
+
+	extras_require={
+		'dev': dev_dependencies
+	},
+
+	zip_safe=False
+)
