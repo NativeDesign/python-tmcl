@@ -1,5 +1,7 @@
+"""
+	Test:  TMCL.Motor#send()
+"""
 from pytest import raises
-
 from TMCL import Reply, Motor, Command
 
 
@@ -21,9 +23,8 @@ class Test__send (object):
 		"""
 		motor = Motor(BasicMockModule())
 
-		with raises(ValueError) as msg:
+		with raises(AssertionError):
 			motor.send('not-an-integer',123,456)
-		assert msg.match(r'cmd must be an integer')
 
 
 	def test__param_type_must_be_an_integer ( self ):
@@ -32,9 +33,8 @@ class Test__send (object):
 		"""
 		motor = Motor(BasicMockModule())
 
-		with raises(ValueError) as msg:
+		with raises(AssertionError):
 			motor.send(123, 'not-an-integer', 456)
-		assert msg.match(r'type must be an integer')
 
 
 	def test__param_type_defaults_to_zero (self):
@@ -42,8 +42,8 @@ class Test__send (object):
 		`type` argument defaults to zero
 		"""
 		class MockModule(object):
-			def send ( self, cmd, type, motbank, value ):
-				if type == 0:
+			def send ( self, instruction ):
+				if instruction.type == 0:
 					raise SuccessException()
 
 		motor = Motor(MockModule())
@@ -57,9 +57,8 @@ class Test__send (object):
 		"""
 		motor = Motor(BasicMockModule())
 
-		with raises(ValueError) as msg:
+		with raises(AssertionError):
 			motor.send(123, 456, 'not-an-integer')
-		assert msg.match(r'value must be an integer')
 
 
 	def test__param_value_defaults_to_zero ( self ):
@@ -67,13 +66,11 @@ class Test__send (object):
 		`value` argument defaults to zero
 		"""
 		class MockModule(object):
-			def send ( self, cmd, type, motbank, value ):
-				if value == 0:
+			def send ( self, instruction ):
+				if instruction.value == 0:
 					raise SuccessException()
-				else:
-					print(value)
 
-		motor = Motor(BasicMockModule())
+		motor = Motor(MockModule())
 		with raises(SuccessException):
 			motor.send(Command.ROR, type=123)
 
@@ -84,5 +81,20 @@ class Test__send (object):
 		for cmd in motor.ALLOWED_COMMANDS:
 			motor.send( cmd )
 			assert True
+
+
+	def test__send_adds_correct_axis_to_command (self):
+		"""
+		Motor instances should append the correct axis id 
+		to commands it sends to module
+		"""
+		AXIS = 3
+		class MockModule (object):
+			def send (self, instruction):
+				assert instruction.motbank == AXIS
+				return Reply()
+
+		motor = Motor(MockModule(), axis=AXIS)
+		motor.send(Command.GAP)
 
 

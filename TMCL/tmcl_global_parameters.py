@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-class GlobalParams:
+class GlobalParams (object):
 	"""
 	The global parameters apply for all types of TMCM modules. They are 
 	grouped into 3 banks: bank 0 (global configuration of the module), 

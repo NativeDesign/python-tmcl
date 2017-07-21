@@ -1,0 +1,5 @@
+sphinx
+sphinx-autodoc
+sphinx-rtd-theme
+sphinxcontrib-napolean
+

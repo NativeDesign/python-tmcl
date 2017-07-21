@@ -20,9 +20,8 @@ class Test__rotate_right (object):
 		Velocity must be validated as an integer 
 		"""
 		motor = Motor(BasicMockModule())
-		with raises(ValueError) as msg:
+		with raises(AssertionError):
 			motor.rotate_right("not an integer")
-		msg.match(r'must be an int')
 
 
 
@@ -33,10 +32,10 @@ class Test__rotate_right (object):
 		motor = Motor(BasicMockModule())
 		motor._max_velocity = 100
 
-		with raises(ValueError) as msg:
+		with raises(AssertionError):
 			motor.rotate_right(-123)
 
-		with raises(ValueError) as msg:
+		with raises(AssertionError):
 			motor.rotate_right(101)
 
 		motor.rotate_right(50)

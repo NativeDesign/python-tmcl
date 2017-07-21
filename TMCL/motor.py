@@ -4,7 +4,7 @@ from .tmcl_commands import Command
 from .tmcl_axis_parameters import AxisParams
 
 
-class Motor(object, AxisParams):
+class Motor(object):
 	"""
 	Motor objects provide an axis-level abstraction layer to a 
 	TMCM module connected to a serial bus. You can use it to 
@@ -183,7 +183,7 @@ class Motor(object, AxisParams):
 		:return: Response status (TMCL.Reply.Status.*)
 		:rtype:  int
 		"""
-		assert isinstance(velocity,(int,long)),         'velocity must be an int'
+		assert isinstance(velocity,int),         'velocity must be an int'
 		assert 0 <= velocity <= self._max_velocity,     'velocity must be in [0..'+str(self._max_velocity)+']'
 
 		reply = self.send(Command.ROL, value=velocity)
@@ -201,7 +201,7 @@ class Motor(object, AxisParams):
 		:return: Response status (TMCL.Reply.Status.*)
 		:rtype:  int
 		"""
-		assert isinstance(velocity, (int,long))
+		assert isinstance(velocity, int)
 		assert 0 <= velocity <= self._max_velocity,     'velocity must be in [0..'+str(self._max_velocity)+']'
 
 		reply = self.send(Command.ROR, value=velocity)

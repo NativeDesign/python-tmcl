@@ -1,4 +1,6 @@
 import struct
+
+from TMCL.instruction import Instruction
 from .__module import Module
 from .motor import Motor
 from .reply import Reply, TrinamicException
@@ -40,7 +42,7 @@ class Bus (object):
 		self.serial = serial
 
 
-	def send ( self, address, command, type, motorbank, value ):
+	def send ( self, address, command, type=0, motorbank=0, value=0 ):
 		"""
 		Send a message to the specified module.
 		This is a blocking function that will not return until a reply
@@ -58,6 +60,14 @@ class Bus (object):
 	
 		:rtype: Reply
 		"""
+
+		if isinstance(command, Instruction):
+			type = command.type
+			motorbank = command.motbank
+			value = command.value
+			command = command.cmd
+
+
 		if self.CAN:
 			msg = struct.pack(MSG_STRUCTURE_CAN, command, type, motorbank,value)
 			self.serial.write(msg)

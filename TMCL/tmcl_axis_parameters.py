@@ -3,7 +3,7 @@
 from .tmcl_commands import Command
 
 
-class AxisParams:
+class AxisParams (object):
 	"""
 	The following sections describe all axis parameters that can be used with the 
 	SAP, GAP, AAP, STAP and RSAP commands. Please note that some parameters are 

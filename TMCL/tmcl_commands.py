@@ -55,7 +55,7 @@ commands = [
 ]
 
 
-class Command: pass
+class Command (object): pass
 for cmd in commands:
 	setattr(Command, cmd[0], cmd[1])
 
